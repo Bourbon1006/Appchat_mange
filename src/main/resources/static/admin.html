@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理系统 - 管理后台</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #3d3d3d;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 24px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .btn:hover::after {
+            width: 200px;
+            height: 200px;
+        }
+
+        .btn-logout {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            margin-left: 10px;
+        }
+
+        .btn-add {
+            background: linear-gradient(45deg, #00b09b, #96c93d);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            background: #2d2d2d;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        th {
+            background: #1e1e1e;
+            color: #fff;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        tr:hover {
+            background: #363636;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 4px;
+            color: white;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .edit-btn {
+            background: linear-gradient(45deg, #2196F3, #4CAF50);
+        }
+
+        .role-btn {
+            background: linear-gradient(45deg, #FF9800, #F44336);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #2d2d2d;
+            margin: 15% auto;
+            padding: 30px;
+            width: 400px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            position: relative;
+            color: #e0e0e0;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: #1e1e1e;
+            border: 2px solid #3d3d3d;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76,175,80,0.2);
+        }
+
+        #message {
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .success {
+            background: rgba(76,175,80,0.2);
+            color: #4CAF50;
+            border: 1px solid rgba(76,175,80,0.3);
+        }
+
+        .error {
+            background: rgba(244,67,54,0.2);
+            color: #f44336;
+            border: 1px solid rgba(244,67,54,0.3);
+        }
+
+        .modal h2 {
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #4CAF50, #2196F3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-content {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* 添加滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .delete-btn {
+            background: linear-gradient(45deg, #ff4757, #ff6b81);
+        }
+
+        #deleteModal .modal-content {
+            width: 350px;
+        }
+
+        #deleteModal .modal-content div {
+            display: flex;
+            gap: 10px;
+        }
+
+        #deleteModal button {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>用户管理后台</h1>
+            <div>
+                <button class="btn btn-add" onclick="showCreateUserModal()">添加用户</button>
+                <button class="btn btn-logout" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+        <div id="message"></div>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>用户名</th>
+                    <th>角色</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="userTable">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 修改密码的模态框 -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>修改密码</h2>
+            <div class="form-group">
+                <label for="newPassword">新密码:</label>
+                <input type="password" id="newPassword" placeholder="请输入新密码">
+            </div>
+            <button onclick="updatePassword()">确认修改</button>
+        </div>
+    </div>
+
+    <!-- 修改角色的模态框 -->
+    <div id="roleModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('roleModal').style.display='none'">&times;</span>
+            <h2>修改角色</h2>
+            <div class="form-group">
+                <label for="newRole">新角色:</label>
+                <select id="newRole">
+                    <option value="USER">普通用户</option>
+                    <option value="ADMIN">管理员</option>
+                </select>
+            </div>
+            <button onclick="updateRole()">确认修改</button>
+        </div>
+    </div>
+
+    <!-- 创建用户的模态框 -->
+    <div id="createUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('createUserModal').style.display='none'">&times;</span>
+            <h2>创建新用户</h2>
+            <div class="form-group">
+                <label for="newUsername">用户名:</label>
+                <input type="text" id="newUsername" placeholder="请输入用户名" required>
+            </div>
+            <div class="form-group">
+                <label for="createPassword">密码:</label>
+                <input type="password" id="createPassword" placeholder="请输入密码" required>
+            </div>
+            <div class="form-group">
+                <label for="createRole">角色:</label>
+                <select id="createRole">
+                    <option value="USER">普通用户</option>
+                    <option value="ADMIN">管理员</option>
+                </select>
+            </div>
+            <button onclick="createUser()">创建用户</button>
+        </div>
+    </div>
+
+    <!-- 添加删除确认的模态框 -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('deleteModal').style.display='none'">&times;</span>
+            <h2>删除用户</h2>
+            <p style="margin-bottom: 20px; text-align: center;">确定要删除用户 <span id="deleteUsername" style="color: #ff4757; font-weight: bold;"></span> 吗？</p>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="cancelDelete()" style="background: #636e72;">取消</button>
+                <button onclick="confirmDelete()" style="background: linear-gradient(45deg, #ff4757, #ff6b81);">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUserId = null;
+        let deleteUserId = null;
+        
+        // 检查是否已登录
+        function checkLogin() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = '/index.html';
+            }
+        }
+
+        // 添加退出登录功能
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/index.html'; // Updated to redirect to index.html
+        }
+
+        // 在所有 fetch 请求的 headers 中添加 token
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+        };
+
+        // 在页面加载时检查登录状态
+        checkLogin();
+
+        // 加载用户列表
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/user/all');
+                const users = await response.json();
+                const tbody = document.getElementById('userTable');
+                tbody.innerHTML = '';
+                
+                users.forEach(user => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.role}</td>
+                        <td>
+                            <button class="action-btn edit-btn" onclick="showPasswordModal(${user.id})">
+                                修改密码
+                            </button>
+                            <button class="action-btn role-btn" onclick="showRoleModal(${user.id}, '${user.role}')">
+                                修改角色
+                            </button>
+                            <button class="action-btn delete-btn" onclick="showDeleteConfirm(${user.id}, '${user.username}')">
+                                删除
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                showMessage('加载用户列表失败: ' + error.message, false);
+            }
+        }
+
+        // 显示修改密码模态框
+        function showPasswordModal(userId) {
+            currentUserId = userId;
+            document.getElementById('passwordModal').style.display = 'block';
+            document.getElementById('newPassword').value = '';
+        }
+
+        // 关闭模态框
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+
+        // 更新密码
+        async function updatePassword() {
+            const newPassword = document.getElementById('newPassword').value;
+            if (!newPassword) {
+                showMessage('请输入新密码', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/user/${currentUserId}/password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password: newPassword })
+                });
+
+                const data = await response.json();
+                showMessage(data.message, data.success);
+                if (data.success) {
+                    document.getElementById('passwordModal').style.display = 'none';
+                }
+            } catch (error) {
+                showMessage('修改密码失败: ' + error.message, false);
+            }
+        }
+
+        function showMessage(message, isSuccess) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.className = isSuccess ? 'success' : 'error';
+        }
+
+        // 添加角色修改的模态框
+        function showRoleModal(userId, currentRole) {
+            currentUserId = userId;
+            document.getElementById('roleModal').style.display = 'block';
+            document.getElementById('newRole').value = currentRole;
+        }
+
+        // 更新角色
+        async function updateRole() {
+            const newRole = document.getElementById('newRole').value;
+            try {
+                const response = await fetch(`/api/user/${currentUserId}/role`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ role: newRole })
+                });
+
+                const data = await response.json();
+                showMessage(data.message, data.success);
+                if (data.success) {
+                    document.getElementById('roleModal').style.display = 'none';
+                    loadUsers(); // 重新加载用户列表
+                }
+            } catch (error) {
+                showMessage('修改角色失败: ' + error.message, false);
+            }
+        }
+
+        function showCreateUserModal() {
+            document.getElementById('createUserModal').style.display = 'block';
+        }
+
+        async function createUser() {
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('createPassword').value;
+            const role = document.getElementById('createRole').value;
+
+            if (!username || !password) {
+                showMessage('用户名和密码不能为空', false);
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/user/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        role: role
+                    })
+                });
+
+                const data = await response.json();
+                showMessage(data.message, data.success);
+                if (data.success) {
+                    document.getElementById('createUserModal').style.display = 'none';
+                    loadUsers(); // 重新加载用户列表
+                }
+            } catch (error) {
+                showMessage('创建用户失败: ' + error.message, false);
+            }
+        }
+
+        function showDeleteConfirm(userId, username) {
+            deleteUserId = userId;
+            document.getElementById('deleteUsername').textContent = username;
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        function cancelDelete() {
+            document.getElementById('deleteModal').style.display = 'none';
+            deleteUserId = null;
+        }
+
+        async function confirmDelete() {
+            try {
+                const response = await fetch(`/api/user/${deleteUserId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+                    }
+                });
+
+                const data = await response.json();
+                showMessage(data.message, data.success);
+                if (data.success) {
+                    document.getElementById('deleteModal').style.display = 'none';
+                    loadUsers(); // 重新加载用户列表
+                }
+            } catch (error) {
+                showMessage('删除用户失败: ' + error.message, false);
+            }
+        }
+
+        // 页面加载时获取用户列表
+        loadUsers();
+    </script>
+</body>
+</html> 
